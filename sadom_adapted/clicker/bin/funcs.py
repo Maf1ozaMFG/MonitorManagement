@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 import concurrent.futures
@@ -34,6 +35,7 @@ def apply_preset(preset_name):
             print(f"Ошибка пресета: {e}")
 
     Thread(target=_apply, daemon=True).start()
+
 
 def bot_polling():
     print("Запуск прослушивания")
@@ -223,9 +225,9 @@ def operation_custom_size(win: Window, position):
 
 
 def run_preset(preset_name):
-    print(f"Применение пресета: {preset_name}")
-
+    print(f"Запуск пресета: {preset_name}")
     tasks = get_clicker_cfg_table(preset_name)
+
     if not tasks:
         print(f"Пресет {preset_name} не найден!")
         return
@@ -235,17 +237,52 @@ def run_preset(preset_name):
             break
 
         win = glob.all_windows[i]
-        print(f"Настройка окна {win.id}: {task['filter']}")
-
-        win.task_name = "url"
-        win.filter = task["filter"]
-        win.new_task = True
+        win.preset_name = preset_name
+        win.auth_type = task.get('auth_type')  # Устанавливаем тип авторизации
 
         try:
+            if not hasattr(win, 'driver') or win.driver is None:
+                win.start()
+                time.sleep(1)
+
+            win.driver.set_page_load_timeout(15)
             win.driver.get(task["filter"])
+
+            # Авторизация только для пресетов с auth_type
+            if win.auth_type:
+                time.sleep(2)
+                win.auth()
+
             win.def_allocation()
+
         except Exception as e:
-            print(f"Ошибка открытия URL в окне {win.id}: {e}")
+            print(f"Ошибка в окне {win.id}: {e}")
+
+    for win in glob.all_windows:
+        try:
+            # Обновляем масштаб
+            win.driver.execute_script("document.body.style.zoom='85%'")
+
+            # Скрываем служебные элементы
+            win.driver.execute_script("""
+                    const unwanted = [
+                        'header', 'footer', 'navbar', 
+                        '.notification', '.cookie-banner',
+                        '[class*="banner"]', '[id*="notice"]'
+                    ].join(',');
+
+                    document.querySelectorAll(unwanted).forEach(el => {
+                        el.style.display = 'none';
+                    });
+                """)
+
+            # Фокусируемся на основном контенте
+            win.driver.execute_script("""
+                    document.querySelector('main, .content')?.scrollIntoView();
+                """)
+
+        except Exception as e:
+            print(f"Финальная настройка окна {win.id} не удалась: {e}")
 
 
 def stop_monitoring(msg):
@@ -266,6 +303,7 @@ def stop_monitoring(msg):
         )
     except Exception as e:
         print(f"Stop error: {e}")
+
 
 def define_wins(params):
     mon_n, win_n = params.split('/')[:2]

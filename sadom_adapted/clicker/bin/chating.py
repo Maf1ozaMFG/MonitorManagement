@@ -34,6 +34,7 @@ def create_main_keyboard(user_id):
     buttons = [
         ("🔄 Пресет 1", "preset_1"),
         ("🔄 Пресет 2", "preset_2"),
+        ("🔄 BMSTU", "preset_bmstu"),
         ("🛑 Остановить", "stop"),
         ("📊 Статус", "report")
     ]
@@ -132,12 +133,18 @@ def handle_callback(call):
             return
 
         if action.startswith("preset_"):
-            try:
-                preset_id = action.split('_')[1]
+            preset_id = action.split('_')[1]
+            if preset_id == "bmstu":  # Особый обработчик для BMSTU
+                msg = bot.send_message(call.message.chat.id, "🔄 Запускаю пресет BMSTU с авторизацией...")
+                Thread(target=lambda: (
+                    run_preset("bmstu"),
+                    bot.edit_message_text("✅ Пресет BMSTU успешно применён",
+                                          chat_id=msg.chat.id,
+                                          message_id=msg.message_id)
+                )).start()
+            else:
                 run_preset(preset_id)
                 bot.send_message(call.message.chat.id, f"🔄 Применен пресет {preset_id}")
-            except Exception as e:
-                bot.send_message(call.message.chat.id, f"❌ Ошибка: {str(e)}")
 
         elif action == "report":
             send_report(call.message)

@@ -1,14 +1,19 @@
+#from clicker.bin.db import get_clicker_cfg_table
 from datetime import datetime, timedelta
+
+from selenium.webdriver.support import expected_conditions as EC
+import time
+
+from selenium.webdriver.common.by import By
+
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.common.exceptions import TimeoutException, InvalidSessionIdException, SessionNotCreatedException
 import traceback
 
-from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.wait import WebDriverWait
 
 from clicker.bin.config_parse import get_item_from_config
-#from clicker.bin.db import get_clicker_cfg_table
-from clicker.bin import glob
 
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
@@ -108,10 +113,33 @@ class Window:
 
     def start(self):
         """Оптимизированный запуск окна"""
+
+        caps = DesiredCapabilities().CHROME
+        caps["pageLoadStrategy"] = "none"
+
+        prefs = {
+            "credentials_enable_service": False,
+            "profile.password_manager_enabled": False,
+            "profile.default_content_setting_values.notifications": 2,
+            "autofill.profile_enabled": False
+        }
+
         options = webdriver.ChromeOptions()
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.page_load_strategy = 'eager'  # Не ждём полной загрузки
+
+        # Базовые настройки
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+
+        # Отключаем ненужные функции
+        options.add_argument("--disable-infobars")
+        options.add_argument("--disable-extensions")
+
+        options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        options.add_experimental_option("useAutomationExtension", False)
+        options.add_experimental_option("prefs", prefs)
 
         try:
             self.driver = webdriver.Chrome(
@@ -214,6 +242,7 @@ class Window:
             print(f"Ошибка закрытия окна {self.id}: {e}")
             return False
 
+    #auth
     '''def auth(self):
         try:
             filter_rule = [name for name, url in glob.auth_info.items() if url in self.driver.current_url]
@@ -234,9 +263,78 @@ class Window:
         except Exception:
             pass'''
 
-    #Заглушка
     def auth(self):
-        pass
+        try:
+            if not hasattr(self, 'auth_type') or not self.auth_type:
+                return  # Пропускаем авторизацию для пресетов без auth_type
+
+            current_url = self.driver.current_url
+            print(f"Попытка авторизации в окне {self.id} на URL: {current_url}")
+
+            # Для прокси авторизации (LKS)
+            if 'proxy.bmstu.ru' in current_url:
+                print("Обнаружена страница прокси-авторизации")
+                try:
+                    # Новые селекторы для прокси формы
+                    username = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "username")))
+                    password = self.driver.find_element(By.ID, "password")
+                    submit = self.driver.find_element(By.NAME, "submit")
+
+                    username.clear()
+                    username.send_keys(get_item_from_config('AUTH')['lks_login'])
+
+                    password.clear()
+                    password.send_keys(get_item_from_config('AUTH')['lks_password'])
+
+                    submit.click()
+                    print("Данные для входа отправлены (прокси)")
+                    time.sleep(3)
+
+                except Exception as e:
+                    print(f"Ошибка авторизации через прокси: {str(e)}")
+                    self.driver.save_screenshot(f"proxy_auth_error_{self.id}.png")
+
+            # Для студ почты
+            if 'student.bmstu.ru' in current_url:
+                print("Обнаружен студенческий портал")
+                try:
+                    # Явное ожидание формы авторизации
+                    WebDriverWait(self.driver, 5).until(
+                        EC.presence_of_element_located((By.CLASS_NAME, "pronto-login")))
+
+                    # Находим элементы по новым селекторам
+                    username = self.driver.find_element(By.NAME, "username")
+                    password = self.driver.find_element(By.NAME, "Password")
+                    submit = self.driver.find_element(By.NAME, "login")
+
+                    # Получаем учетные данные из конфига
+                    auth_config = get_item_from_config('AUTH')
+
+                    # Вводим данные
+                    username.clear()
+                    username.send_keys(auth_config['student_login'])
+
+                    password.clear()
+                    password.send_keys(auth_config['student_password'])
+
+                    # Кликаем по кнопке
+                    submit.click()
+                    print("Данные для студ. портала отправлены")
+
+                    # Проверяем успешность авторизации
+                    WebDriverWait(self.driver, 5).until(
+                        lambda d: "student.bmstu.ru" in d.current_url and "login" not in d.current_url)
+
+                except Exception as e:
+                    print(f"Ошибка авторизации на студ. портале: {str(e)}")
+
+            # Скриншот результата (для отладки)
+            #self.driver.save_screenshot(f"auth_result_{self.id}.png")
+
+        except Exception as e:
+            print(f"Критическая ошибка авторизации: {str(e)}")
+            traceback.print_exc()
+
 
 
 if __name__ == '__main__':

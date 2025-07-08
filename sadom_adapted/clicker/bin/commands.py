@@ -71,6 +71,7 @@ def report(msg):
     except Exception as e:
         bot.reply_to(msg, f"Ошибка: {str(e)}")
 
+
 def install_update(msg: Message):
     """Установка ранее загруженных файлов обновления"""
     install_msg = bot.send_message(msg.chat.id, 'Updating...')

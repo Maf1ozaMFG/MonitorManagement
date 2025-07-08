@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 import random
 from selenium.common.exceptions import NoSuchWindowException, NoSuchElementException, InvalidSessionIdException
@@ -51,8 +52,8 @@ def awake(win: Window):
         win.online = True
         win.def_allocation()
 
-
-def clicker_worker(win: Window):
+#clicker_worker
+'''def clicker_worker(win: Window):
     win.auth()
     win.set_title()
     if its_refresh_time(win) or win.new_task:
@@ -73,9 +74,9 @@ def clicker_worker(win: Window):
                 clicked = btn_click(win.driver, button_name)
                 if clicked:
                     win.button_number += 1
-                    win.button_timestamp = datetime.now()
+                    win.button_timestamp = datetime.now()'''
 
-
+#grafana_worker
 '''def grafana_worker(win: Window):
     win.auth()
     win.set_title()
@@ -85,7 +86,7 @@ def clicker_worker(win: Window):
         win.refresh_timestamp = datetime.now()
         win.new_task = False'''
 
-
+#url_worker
 '''def url_worker(win: Window):
     win.auth()
     win.set_title()
@@ -94,12 +95,32 @@ def clicker_worker(win: Window):
         win.refresh_timestamp = datetime.now()
         win.new_task = False'''
 
+
 def url_worker(win: Window):
-    win.set_title()
-    if its_refresh_time(win) or win.new_task:
-        win.driver.get(win.filter)
-        win.refresh_timestamp = datetime.now()
-        win.new_task = False
+    try:
+        win.set_title()
+        if its_refresh_time(win) or win.new_task:
+            print(f"[Окно {win.id}] Загрузка: {win.filter}")
+
+            # Устанавливаем разумный таймаут
+            win.driver.set_page_load_timeout(15)
+
+            try:
+                win.driver.get(win.filter)
+            except:
+                print(f"[Окно {win.id}] Продолжаем несмотря на таймаут")
+
+            # Для BMSTU выполняем авторизацию
+            if hasattr(win, 'preset_name') and win.preset_name == 'bmstu':
+                # Даем странице немного времени для загрузки
+                time.sleep(2)
+                win.auth()
+
+            win.refresh_timestamp = datetime.now()
+            win.new_task = False
+
+    except Exception as e:
+        print(f"[Окно {win.id}] Не критичная ошибка: {str(e)}")
 
 
 def img_worker(win: Window):
@@ -118,8 +139,8 @@ def None_worker(win: Window):
 def its_refresh_time(win: Window):
     return True if (datetime.now() - win.refresh_timestamp).seconds > win.timeout else False
 
-
-def choose_task(win: Window):
+#choose_task
+'''def choose_task(win: Window):
     queue = get_tasks_table()
     if win.filter:
         queue = [item for item in queue if win.filter in item['incident_code']]
@@ -134,7 +155,7 @@ def choose_task(win: Window):
         return random.choice(queue)
     else:
         # print(f'{win.name} было {len(queue)}, осталось {len(queue_filtred_by_other_wins)}')
-        return random.choice(queue_filtred_by_other_wins)
+        return random.choice(queue_filtred_by_other_wins)'''
 
 
 def btn_click(driver, button):

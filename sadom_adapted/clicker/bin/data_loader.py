@@ -23,15 +23,29 @@ def get_clicker_cfg_table(preset_name):
     urls = presets.get(preset_name, [])
 
     config = []
-    for i, url in enumerate(urls):
-        config.append({
-            "window_name": i + 1,
-            "preset": preset_name,
-            "task": "url",
-            "refresh": 30,
-            "window_position": "standard",
-            "filter": url
-        })
+    for i, item in enumerate(urls):
+        # Поддержка старого (просто URL) и нового формата (словарь)
+        if isinstance(item, dict):
+            config.append({
+                "window_name": i + 1,
+                "preset": preset_name,
+                "task": "url",
+                "refresh": 30,
+                "window_position": "standard",
+                "filter": item['url'],
+                "auth_type": item.get('auth_type')
+            })
+        else:
+            # Старый формат (просто URL строка)
+            config.append({
+                "window_name": i + 1,
+                "preset": preset_name,
+                "task": "url",
+                "refresh": 30,
+                "window_position": "standard",
+                "filter": item,
+                "auth_type": None
+            })
     return config
 
 # Заглушки
