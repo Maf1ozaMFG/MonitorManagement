@@ -39,11 +39,52 @@ def listen():
                 # Возвращаем распознанную команду
                 yield text
 
+# вместо этих функций будут функции для запуска пресетов из других модулей
+# решили сделать так для удобства интегрирования
+def comand_one():
+    pass
+
+def comand_two():
+    pass
+
+def comand_three():
+    pass
+
+def comand_four():
+    pass
+
+def comand_five():
+    pass
+
+def comand_six():
+    pass
+
+def comand_seven():
+    pass
+
+def comand_eight():
+    pass
+
+
+comands = {
+    "команда один": comand_one,
+    "команда два": comand_two,
+    "команда три": comand_three,
+    "команда четыре": comand_four,
+    "команда пять": comand_five,
+    "команда шесть": comand_six,
+    "команда семь": comand_seven,
+    "команда восемь": comand_eight,
+}
 
 for text in listen():
     print(text)
+
     if text == "пока":
         quit()
 
+    if text in comands:
+        print(f"Выполняется {text}")
+        comands[text]()  # Вызов пустой функции
 
     
