@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Система управления жестами</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <!-- Заголовок приложения -->
+    <header class="app-header">
+      <h1>🤖 Система управления жестами</h1>
+      <div class="system-status">
+        <div id="statusIndicator" class="status-indicator status-active"></div>
+        <span id="statusText">Система готова</span>
+      </div>
+    </header>
+
+    <!-- Основная область с видео -->
+    <main class="main-content">
+      <div class="video-container">
+        <video id="videoElement" autoplay muted></video>
+        <!-- Заглушка вместо видео -->
+        <img id="placeholderImg" src="placeholder.jpg" class="placeholder-img" />
+        <canvas id="gestureCanvas"></canvas>
+        <!-- Информация о текущем жесте -->
+        <div class="gesture-overlay">
+          <div class="gesture-label">
+            <span id="gestureText">Жест: не распознан</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Панель управления -->
+      <div class="control-panel">
+        <button class="control-btn primary" id="toggleGestures">
+          <span class="btn-icon">🤚</span>
+          <span class="btn-text">Запустить жесты</span>
+        </button>
+        <button class="control-btn secondary" id="calibrateBtn">
+          <span class="btn-icon">⚙️</span>
+          <span class="btn-text">Калибровка</span>
+        </button>
+      </div>
+    </main>
+
+    <!-- Боковые панели -->
+    <aside class="sidebar sidebar-left">
+      <!-- Панель настроек -->
+      <div class="panel settings-panel">
+        <div class="panel-header">
+          <h3>⚙️ Настройки</h3>
+        </div>
+        <div class="panel-content">
+          <div class="setting-group">
+            <label>Чувствительность жестов:</label>
+            <div class="slider-container">
+              <input type="range" id="gestureThreshold" min="0.5" max="0.95" step="0.05" value="0.8" />
+              <span id="gestureThresholdValue" class="slider-value">80%</span>
+            </div>
+          </div>
+          <div class="setting-group">
+            <label>Порог уверенности:</label>
+            <div class="slider-container">
+              <input type="range" id="confidenceThreshold" min="0.6" max="0.95" step="0.05" value="0.75" />
+              <span id="confidenceThresholdValue" class="slider-value">75%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Панель обратной связи -->
+      <div class="panel feedback-panel">
+        <div class="panel-header">
+          <h3>👋 Распознавание</h3>
+        </div>
+        <div class="panel-content">
+          <div class="gesture-info">
+            <div class="gesture-side">
+              <span class="gesture-label-text" id="gestureTextLeft">Левая рука</span>
+              <span class="gesture-confidence" id="confidenceTextLeft">—</span>
+            </div>
+            <div class="gesture-side">
+              <span class="gesture-label-text" id="gestureTextRight">Правая рука</span>
+              <span class="gesture-confidence" id="confidenceTextRight">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <aside class="sidebar sidebar-right">
+      <!-- Панель команд -->
+      <div class="panel commands-panel">
+        <div class="panel-header">
+          <h3>💻 Команды</h3>
+        </div>
+        <div class="panel-content">
+          <div id="commandDisplay" class="command-display">
+            <div class="command-text">Ожидание жестов...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Журнал событий -->
+      <div class="panel log-panel">
+        <div class="panel-header">
+          <h3>📋 Журнал событий</h3>
+          <button class="clear-log-btn" id="clearLogBtn">🗑️</button>
+        </div>
+        <div class="panel-content">
+          <div id="logContainer" class="log-container"></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
