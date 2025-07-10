@@ -1,21 +1,20 @@
 import json, pyaudio
 from vosk import Model, KaldiRecognizer
 
-model = Model("D:/vosk-model-small-ru-0.4")
+model = Model("./vosk-model-ru-0.42")
 rec = KaldiRecognizer(model, 16000) #Создаётся объект распознавателя (KaldiRecognizer) с частотой дискретизации 16000 Гц (стандарт для Vosk).
 p = pyaudio.PyAudio() #создаёт доступ к аудиоустройствам
 stream = p.open( #открывает аудиопоток с нужными параметрами
-    format=pyaudio.paInt16, 
-    channels=1, 
-    rate=16000, 
-    input=True,
-    frames_per_buffer=8000 
+    format=pyaudio.paInt16,
+    channels=1,
+    rate=16000,
+    input=True, #говорим, что читаем с микрофона
+    frames_per_buffer=8000
 )
 stream.start_stream() #запускает запись.
 
 
 def listen():
-    activated = False
     while True:
         data = stream.read(4000, exception_on_overflow=False)
         if rec.AcceptWaveform(data) and len(data) > 0:
@@ -24,23 +23,14 @@ def listen():
             if not text:
                 continue
 
-            if not activated:
-                # Ждём фразу активации
-                if "привет помощник" in text:
-                    print("Активация: фраза распознана.")
-                    activated = True
+            if text.startswith("миша"):
+                command_text = text.replace("миша", "", 1).strip()
+                yield command_text 
             else:
-                # Уже активирован
-                if "помощник пока" in text:
-                    print("Деактивация: режим ожидания.")
-                    activated = False
-                    continue
-
-                # Возвращаем распознанную команду
-                yield text
+                continue
 
 # вместо этих функций будут функции для запуска пресетов из других модулей
-# решили сделать так для удобства интегрирования
+# решили сделать так для удобсвта интегрирования
 def comand_one():
     pass
 
@@ -67,14 +57,14 @@ def comand_eight():
 
 
 comands = {
-    "команда один": comand_one,
-    "команда два": comand_two,
-    "команда три": comand_three,
-    "команда четыре": comand_four,
-    "команда пять": comand_five,
-    "команда шесть": comand_six,
-    "команда семь": comand_seven,
-    "команда восемь": comand_eight,
+    "режим один": comand_one,
+    "режим два": comand_two,
+    "режим три": comand_three,
+    "режим четыре": comand_four,
+    "режим пять": comand_five,
+    "режим шесть": comand_six,
+    "режим семь": comand_seven,
+    "режим восемь": comand_eight,
 }
 
 for text in listen():
@@ -85,6 +75,4 @@ for text in listen():
 
     if text in comands:
         print(f"Выполняется {text}")
-        comands[text]()  # Вызов пустой функции
-
-    
+        comands[text]() 
