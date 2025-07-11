@@ -43,11 +43,13 @@ def stop_monitoring(msg):
             message_id=status_msg.message_id
         )
 
+#monitor_callback_wrapper
 '''@bot.callback_query_handler(func=lambda call: call.data.startswith('mon_'))
 def monitor_callback_wrapper(call):
-    handle_monitor_selection(call)
+    handle_monitor_selection(call)'''
 
-@bot.message_handler(commands=['monitors'])
+#show_monitor_menu
+'''@bot.message_handler(commands=['monitors'])
 def show_monitor_menu(msg):
     bot.send_message(
         msg.chat.id,
@@ -110,10 +112,10 @@ def set_bot_menu():
     """Корректная настройка команд меню"""
     command_desc = [
         BotCommand(command='/control', description='Пульт управления'),
-        BotCommand(command='/start_monitoring', description='Запустить окна'),
+        '''BotCommand(command='/start_monitoring', description='Запустить окна'),
         BotCommand(command='/stop_monitoring', description='Остановить окна'),
         BotCommand(command='/report', description='Статус окон'),
-        BotCommand(command='/preset', description='Сменить пресет')
+        BotCommand(command='/preset', description='Сменить пресет')'''
     ]
 
     try:

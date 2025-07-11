@@ -14,6 +14,5 @@ def create_logger(name):
     logger.addHandler(fh)
     return logger
 
-
 if __name__ == '__main__':
     pass

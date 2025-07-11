@@ -10,9 +10,9 @@ from clicker.bin.objects import Window
 #from clicker.bin.db import get_tasks_table, get_grafana_urls
 
 
+#dynamic_workers
 def dynamic_worker(win: Window):
     sleep(0.1)  # не большая задержка существенно сокращает количество выполнений
-    '''try:'''
     if win.pause:
         pause_mode(win)
     elif win.blocked_by:
@@ -25,14 +25,6 @@ def dynamic_worker(win: Window):
             clicker_worker(win)
         elif win.task_name == 'url':
             url_worker(win)
-    '''except NoSuchWindowException:
-        pass
-    except InvalidSessionIdException:
-        pass
-    except Exception:
-        print(traceback.format_exc())
-    finally:
-        return win'''
 
 
 def pause_mode(win: Window):

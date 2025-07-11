@@ -221,6 +221,7 @@ def handle_action(call, action):
         print(f"Action error: {e}")
         bot.answer_callback_query(call.id, f"Ошибка: {str(e)}", show_alert=True)
 
+
 def show_main_menu(call):
     """Показ главного меню"""
     try:

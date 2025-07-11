@@ -1,10 +1,7 @@
-# работает только на стенде т.к. нужна версия chrome 100.0.4896.88 и соответствующий chromedriver
-# версия selenium selenium==3.14.1
-# pyinstaller -F --upx-exclude "vcruntime140.dll" --onefile sadom_adapted.py
-
-
 import os.path
 import signal
+
+from clicker.voice_module import main as voice_control
 
 from telebot.apihelper import ApiTelegramException
 from bin.chating_old import control_chating, start_image_url_chating
@@ -60,11 +57,12 @@ def url_handler(msg):
     if like_url(msg):
         start_image_url_chating(msg, 'url', msg.text)
 
-
+#download_update
 '''@bot.message_handler(content_types=['document'], func=lambda x: is_update(x))
 def download_update(msg: types.Message):
     load_update(msg)'''
 
+#module_update
 '''@bot.message_handler(commands=['update_module'], func=lambda x: check_chat(x.chat.id))
 def module_updater(msg: types.Message):
     wait_msg = bot.send_message(msg.chat.id, 'Wait file')
@@ -165,7 +163,7 @@ def set_task_callback(call):
     except ApiTelegramException:
         pass
 
-
+#if __name__ == '__main__'
 '''if __name__ == '__main__':
     run_modules()
     logger.info('set_bot_menu')
@@ -181,15 +179,22 @@ def set_task_callback(call):
     logger.info('start_bots')
     start_bots()'''
 
+
 def shutdown_handler(signum, frame):
     """Обработчик сигналов завершения"""
     print("\nПолучен сигнал завершения...")
+
+    # Закрываем все окна
     for window in getattr(glob, 'all_windows', []):
         try:
-            window.kill()
+            if hasattr(window, 'kill'):
+                window.kill()
         except:
             pass
-    sys.exit(0)
+
+    # Даем время на завершение
+    time.sleep(1)
+    os._exit(0)  # Используем os._exit вместо sys.exit для немедленного завершения
 
 # Регистрируем обработчики
 signal.signal(signal.SIGINT, shutdown_handler)
@@ -204,6 +209,9 @@ if __name__ == '__main__':
 
         print("2. Запуск окон Chrome")
         start_browsers()
+
+        print("3. Запуск голосового управления")
+        voice_control.ADMIN_CHAT_ID = get_item_from_config('CHAT_ID')['chat_id']
 
         set_bot_menu()
         thread_polling()

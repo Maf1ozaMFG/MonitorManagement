@@ -73,6 +73,7 @@ class Window:
         self.width = (self.mon_width + int(offsets["width_error"])) // 2
         self.height = (self.mon_height + int(offsets["height_error"])) // 2
 
+    #start (first SADOM)
     '''def start(self):
         try:
             # отключение ожидания загрузки окна
@@ -296,11 +297,10 @@ class Window:
 
             # Для студ почты
             if 'student.bmstu.ru' in current_url:
-                print("Обнаружен студенческий портал")
+                print("Обнаружена студ. почта")
                 try:
                     # Явное ожидание формы авторизации
-                    WebDriverWait(self.driver, 5).until(
-                        EC.presence_of_element_located((By.CLASS_NAME, "pronto-login")))
+                    WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, "pronto-login")))
 
                     # Находим элементы по новым селекторам
                     username = self.driver.find_element(By.NAME, "username")

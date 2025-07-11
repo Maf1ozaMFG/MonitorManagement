@@ -226,6 +226,7 @@ def operation_custom_size(win: Window, position):
 
 def run_preset(preset_name):
     print(f"Запуск пресета: {preset_name}")
+
     tasks = get_clicker_cfg_table(preset_name)
 
     if not tasks:

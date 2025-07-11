@@ -10,5 +10,25 @@
     "https://mail.yandex.ru",
     "https://github.com",
     "https://google.com"
+  ],
+  "bmstu": [
+    {
+      "url": "https://lks.bmstu.ru/progress",
+      "auth_type": "lks"
+    },
+    {
+      "url": "https://lks.bmstu.ru/fv",
+      "auth_type": "lks"
+    },
+    {
+      "url": "https://lks.bmstu.ru/materials",
+      "auth_type": "lks"
+    },
+    {
+      "url": "https://lks.bmstu.ru/uslugi",
+      "auth_type": "lks"
+    }
   ]
 }
+
+
