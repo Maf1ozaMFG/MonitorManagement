@@ -5,6 +5,30 @@ import sys
 import HandTrackingModule as htm
 
 
+def comand_one():
+    print("Активирован режим 1 (1 палец)")
+
+def comand_two():
+    print("Активирован режим 2 (2 пальца)")
+
+def comand_three():
+    print("Активирован режим 3 (3 пальца)")
+
+def comand_four():
+    print("Активирован режим 4 (4 пальца)")
+
+def comand_five():
+    print("Активирован режим 5 (5 пальцев)")
+
+
+
+comands = {
+    1: comand_one,
+    2: comand_two,
+    3: comand_three,
+    4: comand_four,
+    5: comand_five,
+}
 class CameraController:
     def __init__(self, width=640, height=480, device=0):
         self.width = width
@@ -109,6 +133,8 @@ def main():
     detector = htm.HandDetector(min_detection_confidence=0.7)
     total_fingers = 0
     fps_time = time.time()
+    last_command_time = 0
+    command_delay = 1
 
     while True:
         success, frame = camera.read_frame()
@@ -117,7 +143,6 @@ def main():
             break
 
         frame = cv2.flip(frame, 1)
-
         frame = detector.find_hands(frame)
 
         finger_count = 0
@@ -126,6 +151,14 @@ def main():
             if landmarks:
                 fingers_up = detector.count_fingers_up(landmarks)
                 finger_count = sum(fingers_up)
+
+                current_time = time.time()
+                if (finger_count in comands and
+                    finger_count != total_fingers and
+                    current_time - last_command_time > command_delay):
+                    comands[finger_count]()
+                    total_fingers = finger_count
+                    last_command_time = current_time
 
         if 0 <= finger_count < len(overlay_list):
             h, w = overlay_list[finger_count].shape[:2]
@@ -149,7 +182,6 @@ def main():
     camera.release()
     cv2.destroyAllWindows()
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())
